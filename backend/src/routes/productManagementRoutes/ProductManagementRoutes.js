@@ -8,6 +8,8 @@ import { searchProducts, searchSuppliers } from '../../controllers/productManage
 import generateStockSummaryReport from '../../controllers/productManagementControllers/reports/StockSummeryReport.js'
 import GenerateSupplierStockReport from '../../controllers/productManagementControllers/reports/SuppliesSummeryReport.js'
 
+import upload from '../../middleware/productManagementMiddlewares/upload.js'
+
 const router = express.Router()
 
 //Category routes
@@ -18,7 +20,7 @@ router.put('/category', updateCategory)
 router.delete('/category', deleteCategory)
 
 //Product routes
-router.post('/product', createProduct)
+router.post('/product', upload.array('images', 5), createProduct)
 router.get('/product/:id', getProductById)
 router.get('/product', getAllProducts)
 router.put('/product', updateProduct)
