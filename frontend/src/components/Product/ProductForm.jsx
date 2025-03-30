@@ -3,10 +3,18 @@ import { ImagePlus, X } from 'lucide-react';
 
 const ProductForm = ({ onSubmit }) => {
   const [productName, setProductName] = useState('');
-  const [category, setCategory] = useState('');
+  const [categories, setCategories] = useState([]);
   const [description, setDescription] = useState('');
   const [images, setImages] = useState([]);
   const [previewImages, setPreviewImages] = useState([]);
+
+  const handleNameChange = (e) => {
+    const value = e.target.value;
+    // Only allow letters, spaces, and basic punctuation
+    if (/^[a-zA-Z\s.,'\-]*$/.test(value)) {
+      setProductName(value);
+    }
+  };
 
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files);
@@ -31,16 +39,36 @@ const ProductForm = ({ onSubmit }) => {
     setPreviewImages(newPreviewImages);
   };
 
+  const handleCategoryChange = (e) => {
+    const value = e.target.value;
+    if (categories.includes(value)) {
+      setCategories(categories.filter(cat => cat !== value));
+    } else {
+      setCategories([...categories, value]);
+    }
+  };
+
   const handleFormSubmit = (e) => {
     e.preventDefault();
-    if (!productName || !category || !description) {
-      alert('Please fill all required fields');
+    
+    if (!productName.trim()) {
+      alert('Please enter a valid product name');
+      return;
+    }
+    
+    if (categories.length === 0) {
+      alert('Please select at least one category');
+      return;
+    }
+
+    if (!description.trim()) {
+      alert('Please enter a description');
       return;
     }
 
     const newProduct = {
       name: productName,
-      category,
+      categories,
       description,
       images: previewImages,
     };
@@ -51,46 +79,71 @@ const ProductForm = ({ onSubmit }) => {
 
   const resetForm = () => {
     setProductName('');
-    setCategory('');
+    setCategories([]);
     setDescription('');
     setImages([]);
     setPreviewImages([]);
   };
 
+  const categoryOptions = [
+    "Cakes",
+    "Cupcakes",
+    "Cookies",
+    "Chocolates",
+    "Ice Cream",
+    "Other"
+  ];
+
   return (
     <form onSubmit={handleFormSubmit} className="space-y-4">
       <div>
         <label className="block text-sm font-medium text-amber-700 mb-1">
-          Product Name <span className="text-orange-500">*</span>
+          Product Name <span className="text-red-500">*</span>
         </label>
         <input
           type="text"
           value={productName}
-          onChange={(e) => setProductName(e.target.value)}
+          onChange={handleNameChange}
           className="w-full px-3 py-2 border border-amber-200 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
           placeholder="e.g., Chocolate Cupcake"
           required
+          pattern="[a-zA-Z\s.,'\-]+"
+          title="Only letters, spaces, and basic punctuation allowed"
         />
+        <p className="mt-1 text-sm text-gray-500">
+          Only letters, spaces, and basic punctuation (.,'-) allowed
+        </p>
       </div>
 
       <div>
         <label className="block text-sm font-medium text-amber-700 mb-1">
-          Category <span className="text-orange-500">*</span>
+          Categories <span className="text-orange-500">*</span>
         </label>
-        <select
-          value={category}
-          onChange={(e) => setCategory(e.target.value)}
-          className="w-full px-3 py-2 border border-amber-200 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
-          required
-        >
-          <option value="">Select a category</option>
-          <option value="Cakes">Cakes</option>
-          <option value="Cupcakes">Cupcakes</option>
-          <option value="Cookies">Cookies</option>
-          <option value="Chocolates">Chocolates</option>
-          <option value="Ice Cream">Ice Cream</option>
-          <option value="Other">Other</option>
-        </select>
+        <div className="grid grid-cols-2 gap-2">
+          {categoryOptions.map((option) => (
+            <div key={option} className="flex items-center">
+              <input
+                type="checkbox"
+                id={`category-${option}`}
+                value={option}
+                checked={categories.includes(option)}
+                onChange={handleCategoryChange}
+                className="h-4 w-4 text-amber-600 focus:ring-amber-500 border-amber-300 rounded"
+              />
+              <label 
+                htmlFor={`category-${option}`} 
+                className="ml-2 block text-sm text-amber-700"
+              >
+                {option}
+              </label>
+            </div>
+          ))}
+        </div>
+        {categories.length > 0 && (
+          <div className="mt-2 text-sm text-amber-600">
+            Selected: {categories.join(', ')}
+          </div>
+        )}
       </div>
 
       <div>
