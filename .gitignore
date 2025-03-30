@@ -1,4 +1,4 @@
-node_module/
-.env
-package-lock.json
-npm-debug.log
+*node_modules
+*package-lock.json
+*dist
+*.env
