@@ -5,7 +5,7 @@ import StockProductsSellingPrices from "../../models/productManagementModels/Sto
 
 export const createStock = async (req, res) => {
     try {
-        const { products = [], supplierId, sellingPrice } = req.body;
+        const { products = [], supplierId } = req.body;
 
         if (!supplierId || products.length === 0) {
             return res.status(400).json({ message: "All fields are required" });
@@ -14,26 +14,27 @@ export const createStock = async (req, res) => {
         const stock = new StockModel({ Supplier: supplierId });
         await stock.save();
 
-        const stockProducts = products.map(product => ({
-            product: product.id,
-            stock: stock._id,
-            quantity: Number(product.quantity),
-            price: Number(product.price),
-            manufactureDate: new Date(product.manufactureDate),
-            expirationDate: new Date(product.expirationDate),
-            starRatings: 0,
-            textReview: product.textReview || null,
-            customer: product.customer || null
-        }));
+        const stockProductsPromises = products.map(async (product) => {
+            const stockProductData = {
+                product: product.id,
+                stock: stock._id,
+                quantity: Number(product.quantity),
+                price: Number(product.price),
+                manufactureDate: new Date(product.manufactureDate),
+                expirationDate: new Date(product.expirationDate),
+                starRatings: 0,
+                textReview: product.textReview || null,
+                customer: product.customer || null
+            };
 
-        const stockProductsPromises = stockProducts.map(async (stockProductData) => {
             const stockProductDoc = new StockProducts(stockProductData);
             const savedStockProduct = await stockProductDoc.save();
 
             const sellingPriceData = {
                 stockProducts: savedStockProduct._id,
-                sellingPrice: Number(stockProductData.sellingPrice) || 0
+                sellingPrice: Number(product.sellingPrice) || 0
             };
+
             const stockProductSellingPriceDoc = new StockProductsSellingPrices(sellingPriceData);
             await stockProductSellingPriceDoc.save();
 
@@ -47,6 +48,7 @@ export const createStock = async (req, res) => {
         return res.status(500).json({ message: "Internal server error", error: error.message });
     }
 };
+
 
 export const getStockById = async (req, res) => {
     const { id } = req.params;
@@ -222,12 +224,12 @@ export const updateStock = async (req, res) => {
 };
 
 export const addProductsToStock = async (req, res) => {
-    const { stockId, products = [], sellingPrice } = req.body;
+    const { stockId, products = [] } = req.body;
 
     try {
         // Validate input
-        if (!stockId || products.length === 0 || !sellingPrice) {
-            return res.status(400).json({ message: "Stock ID, products, and selling price are required." });
+        if (!stockId || products.length === 0) {
+            return res.status(400).json({ message: "Stock ID and products are required." });
         }
 
         // Check if the stock exists
@@ -236,45 +238,46 @@ export const addProductsToStock = async (req, res) => {
             return res.status(404).json({ message: "Stock not found." });
         }
 
-        // Prepare the product data to be added
-        const stockProductsData = products.map(product => ({
-            product: product.id,
-            stock: stock._id,
-            quantity: Number(product.quantity),
-            price: Number(product.price),
-            manufactureDate: new Date(product.manufactureDate),
-            expirationDate: new Date(product.expirationDate),
-            starRatings: 0,
-            textReview: product.textReview || null,
-            customer: product.customer || null
-        }));
+        // Add products to StockProducts and store selling prices
+        const stockProductsPromises = products.map(async (product) => {
+            const stockProductData = {
+                product: product.id,
+                stock: stock._id,
+                quantity: Number(product.quantity),
+                price: Number(product.price),
+                manufactureDate: new Date(product.manufactureDate),
+                expirationDate: new Date(product.expirationDate),
+                starRatings: 0,
+                textReview: product.textReview || null,
+                customer: product.customer || null
+            };
 
-        // Add products to StockProducts
-        const stockProductsPromises = stockProductsData.map(async (stockProductData) => {
             const stockProductDoc = new StockProducts(stockProductData);
             const savedStockProduct = await stockProductDoc.save();
 
-            // Add the selling price to StockProductsSellingPrices
+            // Use product.sellingPrice instead of stockProductData.sellingPrice
             const sellingPriceData = {
                 stockProducts: savedStockProduct._id,
-                sellingPrice: Number(sellingPrice)
+                sellingPrice: Number(product.sellingPrice) || 0  // ✅ Fix here
             };
+
             const stockProductSellingPriceDoc = new StockProductsSellingPrices(sellingPriceData);
             await stockProductSellingPriceDoc.save();
 
             return savedStockProduct;
         });
 
-        await Promise.all(stockProductsPromises);
+        const addedProducts = await Promise.all(stockProductsPromises);
 
         return res.status(201).json({
             message: "Products added successfully to stock.",
-            addedProducts: stockProductsData
+            addedProducts
         });
     } catch (error) {
         return res.status(500).json({ message: "Internal server error", error: error.message });
     }
 };
+
 
 export const removeProductsFromStock = async (req, res) => {
     const { stockId, productIds = [] } = req.body;
@@ -285,11 +288,8 @@ export const removeProductsFromStock = async (req, res) => {
             return res.status(400).json({ message: "Stock ID and at least one product ID are required." });
         }
 
-        // Convert stockId to ObjectId
-        const stockObjectId = new mongoose.Types.ObjectId(stockId);
-
         // Check if the stock exists
-        const stock = await StockModel.findById(stockObjectId);
+        const stock = await StockModel.findById(stockId);
         if (!stock) {
             return res.status(404).json({ message: "Stock not found." });
         }
@@ -304,11 +304,11 @@ export const removeProductsFromStock = async (req, res) => {
                 continue;
             }
 
-            // Convert productId to ObjectId
-            const productObjectId = new mongoose.Types.ObjectId(productId);
+            const product = await StockProducts.findOne({
+                product: productId,
+                stock: stockId
+            });
 
-            const product = await StockProducts.findOne({ product: productObjectId, stock: stockObjectId });
-            console.log(`${product}`);
             if (!product) {
                 errors.push(`Product with ID ${productId} not found in this stock.`);
                 continue;

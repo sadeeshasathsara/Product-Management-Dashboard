@@ -2,7 +2,6 @@ import "dotenv/config";
 import express from 'express';
 import cors from 'cors';
 import mongoose from 'mongoose';
-import dotenv from 'dotenv';
 import bodyParser from 'body-parser';
 
 import ProductManagementRoutes from './src/routes/productManagementRoutes/ProductManagementRoutes.js';
