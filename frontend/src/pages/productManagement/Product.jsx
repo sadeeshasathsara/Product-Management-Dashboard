@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Plus, Search } from 'lucide-react';
+import { X, Plus, Search, Candy } from 'lucide-react';
 import ProductForm from '../../components/Product/ProductForm';
 import ProductList from '../../components/Product/ProductList';
 
@@ -44,9 +44,7 @@ const Product = () => {
       <div className="max-w-4xl mx-auto relative z-10">
         <div className="text-left mb-8">
           <h1 className="text-3xl font-bold text-amber-800 flex items-center gap-2">
-            <span className="w-8 h-8 bg-amber-500 rounded-full flex justify-center items-center text-white">
-              +
-            </span>
+          <Candy className="w-8 h-8" />
             Inventory Items
           </h1>
           <p className="text-amber-600 mt-1">Efficiently track and manage your products</p>
