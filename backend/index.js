@@ -1,21 +1,30 @@
-import express from 'express'
-import cors from 'cors'
-import mongoose from 'mongoose'
-import bodyParser from 'body-parser'
-import dotenv from 'dotenv'
+import "dotenv/config";
+import express from 'express';
+import cors from 'cors';
+import mongoose from 'mongoose';
+import dotenv from 'dotenv';
+import bodyParser from 'body-parser';
 
-import ManageProductRoutes from './src/routes/manageProductRoutes/ManageProductRoutes.js'
+import ProductManagementRoutes from './src/routes/productManagementRoutes/ProductManagementRoutes.js';
 
-const app = express()
-app.use(express.json())
-app.use(cors())
-dotenv.config()
+const app = express();
+app.use(express.json());
+app.use(bodyParser.json());
+app.use(cors());
 
-app.use('/api/manage-products', ManageProductRoutes)
 
+// Routes
+app.use('/api/product-management', ProductManagementRoutes);
+
+// Connect to MongoDB
 mongoose.connect(process.env.MONGO_URI)
     .then(() => {
-        console.log(`MongoDB Connected`)
-        const PORT = process.env.PORT || 5000
-        app.listen(PORT, () => console.log(`Server is running on port ${PORT}`))
+        console.log('MongoDB Connected');
+
+        const PORT = process.env.PORT || 5000;
+        app.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
     })
+    .catch((error) => {
+        console.error('MongoDB connection failed:', error.message);
+        process.exit(1);
+    });
