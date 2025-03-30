@@ -4,6 +4,11 @@ import { createCategory, deleteCategory, getAllCategories, getCategoryById, upda
 import { createProduct, deleteProduct, getAllProducts, getProductById, updateProduct } from '../../controllers/productManagementControllers/Product.js'
 import { createSupplier, getSuplierById, getAllSuppliers, updateSupplier, deleteSupplier } from '../../controllers/productManagementControllers/Suplier.js'
 import { createStock, getStockById, getAllStocks, updateStock, deleteStock, removeProductsFromStock, addProductsToStock } from '../../controllers/productManagementControllers/Stock.js'
+import { searchProducts, searchSuppliers } from '../../controllers/productManagementControllers/fetch/Search.js'
+import generateStockSummaryReport from '../../controllers/productManagementControllers/reports/StockSummeryReport.js'
+import GenerateSupplierStockReport from '../../controllers/productManagementControllers/reports/SuppliesSummeryReport.js'
+
+import upload from '../../middleware/productManagementMiddlewares/upload.js'
 
 const router = express.Router()
 
@@ -15,7 +20,7 @@ router.put('/category', updateCategory)
 router.delete('/category', deleteCategory)
 
 //Product routes
-router.post('/product', createProduct)
+router.post('/product', upload.array('images', 5), createProduct)
 router.get('/product/:id', getProductById)
 router.get('/product', getAllProducts)
 router.put('/product', updateProduct)
@@ -36,5 +41,13 @@ router.put('/stock', updateStock)
 router.delete('/stock', deleteStock)
 router.post('/stock/product', addProductsToStock)
 router.delete('/stock/product', removeProductsFromStock)
+
+//Search query routes
+router.get('/product/q', searchProducts)
+router.get('/supplier/q', searchSuppliers)
+
+//Report routes
+router.get('/report/stock-summary', generateStockSummaryReport)
+router.get('/report/supplier-stock', GenerateSupplierStockReport)
 
 export default router
