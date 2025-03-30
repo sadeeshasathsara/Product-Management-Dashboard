@@ -14,7 +14,7 @@ const Sidebar = () => {
   return (
     <div className="h-screen w-64 bg-gray-900 text-white flex flex-col">
       {/* Enhanced Logo Section with Custom Font */}
-      <div className="px-4 py-4 border-b border-gray-700 h-18 flex items-center justify-center">
+      <div className="cursor-pointer px-4 py-4 border-gray-700 h-18 flex items-center justify-center">
         <div className="flex flex-col items-center">
           <span className="text-3xl font-bold bg-gradient-to-r from-amber-300 via-amber-400 to-amber-500 bg-clip-text text-transparent tracking-tight leading-none font-[Poppins]">
             Pabasara
@@ -39,7 +39,7 @@ const Sidebar = () => {
 
       {/* Logout Button */}
       <div className="p-4 border-t border-gray-700">
-        <button 
+        <button
           onClick={handleLogout}
           className="flex items-center w-full p-3 rounded-lg hover:bg-gray-700 transition-all text-red-400 hover:text-red-300"
         >
@@ -58,13 +58,12 @@ const Sidebar = () => {
 
 const NavItem = ({ to, icon, label }) => {
   return (
-    <NavLink 
-      to={to} 
-      className={({ isActive }) => 
-        `flex items-center p-3 rounded-lg transition-all relative ${
-          isActive 
-            ? "text-amber-400 font-medium" 
-            : "hover:bg-gray-700 text-gray-300"
+    <NavLink
+      to={to}
+      className={({ isActive }) =>
+        `flex items-center p-3 rounded-lg transition-all relative ${isActive
+          ? "text-amber-400 font-medium"
+          : "hover:bg-gray-700 text-gray-300"
         }`
       }
     >

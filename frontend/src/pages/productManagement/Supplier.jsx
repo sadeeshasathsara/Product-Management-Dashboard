@@ -31,7 +31,7 @@ const Supplier = () => {
   };
 
   return (
-    <div className="min-h-screen bg-amber-50 p-6 relative overflow-hidden">
+    <div className="min-h-screen bg-[#f4f3f3] p-6 relative overflow-hidden">
       {/* Background Sweet Icons */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none z-0 opacity-10">
         <CandyCane className="absolute top-20 left-10 w-32 h-32 text-amber-500" />
@@ -48,7 +48,7 @@ const Supplier = () => {
           </h1>
           <p className="text-amber-600 mt-1">Our trusted partners in sweet success</p>
         </div>
-        
+
         <div className="flex justify-end mb-6">
           <button
             onClick={() => setShowModal(true)}

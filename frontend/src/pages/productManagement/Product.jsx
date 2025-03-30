@@ -26,7 +26,7 @@ const Product = () => {
   };
 
   return (
-    <div className="min-h-screen p-6 bg-amber-50 relative overflow-hidden">
+    <div className="min-h-screen p-6 bg-[#f4f3f3] relative overflow-hidden">
       {/* Optimized visible background icons */}
       <div className="fixed inset-0 -z-10 opacity-30 pointer-events-none">
         <CandyCane className="absolute top-[10%] left-[5%] w-28 h-28 text-amber-400/50" />
@@ -42,7 +42,7 @@ const Product = () => {
         <div className="text-left mb-8">
           <h1 className="text-3xl font-bold text-amber-800 flex items-center gap-2">
             <Dessert className="w-8 h-8" />
-            Inventory Items   
+            Inventory Items
           </h1>
           <p className="text-amber-600 mt-1">Efficiently track and manage your products</p>
         </div>

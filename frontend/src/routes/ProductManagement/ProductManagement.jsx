@@ -6,18 +6,20 @@ import Product from '../../pages/productManagement/Product'
 import Stock from '../../pages/productManagement/Stock'
 import Feedback from '../../pages/productManagement/Feedback'
 import Supplier from '../../pages/productManagement/Supplier'
+import RedirectComponent from './Redirect'
 
 
 function ProductManagement() {
     return (
         <Routes>
             <Route element={<ProductManagementLayout />}>
-                <Route index path='dashboard' element={<Dashboard/>}/>
-                <Route path="Products" element={<Product/>}/>
-                <Route path="Stock" element={<Stock/>}/>
-                <Route path="Supplier" element={<Supplier/>}/>
-                <Route path="Feedback" element={<Feedback/>}/>
-                
+                <Route index element={<RedirectComponent />} />
+                <Route path='dashboard' element={<Dashboard />} />
+                <Route path="Products" element={<Product />} />
+                <Route path="Stock" element={<Stock />} />
+                <Route path="Supplier" element={<Supplier />} />
+                <Route path="Feedback" element={<Feedback />} />
+
             </Route>
         </Routes>
     )
