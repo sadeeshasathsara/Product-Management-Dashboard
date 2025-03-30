@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { motion } from 'framer-motion';
 import { Plus, Truck, CandyCane, IceCream, Cake, Dessert } from 'lucide-react';
 import SupplierForm from '../../components/Supplier/SupplierForm';
 import SupplierList from '../../components/Supplier/SupplierList';
@@ -59,16 +60,28 @@ const Supplier = () => {
           </button>
         </div>
 
-        <SupplierList
-          suppliers={suppliers}
-          onEdit={openEditModal}
-          onDelete={handleDeleteSupplier}
-        />
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <SupplierList
+            suppliers={suppliers}
+            onEdit={openEditModal}
+            onDelete={handleDeleteSupplier}
+          />
+        </motion.div>
 
-        {/* Modal Popup */}
+        {/* Modal Popup without Background Animation */}
         {showModal && (
           <div className="fixed inset-0 bg-[#00000095] flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-xl shadow-lg w-full max-w-md">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.8 }}
+              transition={{ duration: 0.3 }}
+              className="bg-white rounded-xl shadow-lg w-full max-w-md"
+            >
               <SupplierForm
                 supplier={editingSupplier}
                 onSubmit={handleAddSupplier}
@@ -77,7 +90,7 @@ const Supplier = () => {
                   setEditingSupplier(null);
                 }}
               />
-            </div>
+            </motion.div>
           </div>
         )}
       </div>
