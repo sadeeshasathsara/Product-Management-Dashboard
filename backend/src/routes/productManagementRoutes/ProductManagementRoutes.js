@@ -5,6 +5,8 @@ import { createProduct, deleteProduct, getAllProducts, getProductById, updatePro
 import { createSupplier, getSuplierById, getAllSuppliers, updateSupplier, deleteSupplier } from '../../controllers/productManagementControllers/Suplier.js'
 import { createStock, getStockById, getAllStocks, updateStock, deleteStock, removeProductsFromStock, addProductsToStock } from '../../controllers/productManagementControllers/Stock.js'
 import { searchProducts, searchSuppliers } from '../../controllers/productManagementControllers/fetch/Search.js'
+import generateStockSummaryReport from '../../controllers/productManagementControllers/reports/StockSummeryReport.js'
+import GenerateSupplierStockReport from '../../controllers/productManagementControllers/reports/SuppliesSummeryReport.js'
 
 const router = express.Router()
 
@@ -42,5 +44,8 @@ router.delete('/stock/product', removeProductsFromStock)
 router.get('/product/q', searchProducts)
 router.get('/supplier/q', searchSuppliers)
 
+//Report routes
+router.get('/report/stock-summary', generateStockSummaryReport)
+router.get('/report/supplier-stock', GenerateSupplierStockReport)
 
 export default router
