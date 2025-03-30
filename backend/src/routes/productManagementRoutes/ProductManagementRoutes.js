@@ -4,6 +4,7 @@ import { createCategory, deleteCategory, getAllCategories, getCategoryById, upda
 import { createProduct, deleteProduct, getAllProducts, getProductById, updateProduct } from '../../controllers/productManagementControllers/Product.js'
 import { createSupplier, getSuplierById, getAllSuppliers, updateSupplier, deleteSupplier } from '../../controllers/productManagementControllers/Suplier.js'
 import { createStock, getStockById, getAllStocks, updateStock, deleteStock, removeProductsFromStock, addProductsToStock } from '../../controllers/productManagementControllers/Stock.js'
+import { searchProducts, searchSuppliers } from '../../controllers/productManagementControllers/fetch/Search.js'
 
 const router = express.Router()
 
@@ -36,5 +37,10 @@ router.put('/stock', updateStock)
 router.delete('/stock', deleteStock)
 router.post('/stock/product', addProductsToStock)
 router.delete('/stock/product', removeProductsFromStock)
+
+//Search query routes
+router.get('/product/q', searchProducts)
+router.get('/supplier/q', searchSuppliers)
+
 
 export default router
