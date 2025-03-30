@@ -75,21 +75,17 @@ const Supplier = () => {
         {/* Modal Popup without Background Animation */}
         {showModal && (
           <div className="fixed inset-0 bg-[#00000095] flex items-center justify-center p-4 z-50">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.8 }}
-              transition={{ duration: 0.3 }}
-              className="bg-white rounded-xl shadow-lg w-full max-w-md"
-            >
-              <SupplierForm
-                supplier={editingSupplier}
-                onSubmit={handleAddSupplier}
-                onCancel={() => {
-                  setShowModal(false);
-                  setEditingSupplier(null);
-                }}
-              />
+            <motion.div>
+              <div className="bg-white rounded-xl shadow-lg w-full max-w-md">
+                <SupplierForm
+                  supplier={editingSupplier}
+                  onSubmit={handleAddSupplier}
+                  onCancel={() => {
+                    setShowModal(false);
+                    setEditingSupplier(null);
+                  }}
+                />
+              </div>
             </motion.div>
           </div>
         )}

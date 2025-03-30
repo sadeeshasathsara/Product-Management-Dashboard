@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Plus, Search } from 'lucide-react';
+import { X, Plus, Search, CandyCane, IceCream, Cake, Dessert, Candy } from 'lucide-react';
 import ProductForm from '../../components/Product/ProductForm';
 import ProductList from '../../components/Product/ProductList';
 
