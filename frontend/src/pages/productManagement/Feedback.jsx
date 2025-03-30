@@ -1,4 +1,4 @@
-import { Star, StarHalf, Cake, Candy, IceCream, Cookie, MessageSquare } from 'lucide-react';
+import { Star, StarHalf, Cake, Candy, IceCream, Cookie, MessageSquare, CandyCane, Dessert } from 'lucide-react';
 
 const Feedback = () => {
   // Sample feedback data
@@ -42,35 +42,35 @@ const Feedback = () => {
     const stars = [];
     const fullStars = Math.floor(rating);
     const hasHalfStar = rating % 1 !== 0;
-    
+
     for (let i = 0; i < fullStars; i++) {
       stars.push(
-        <Star 
-          key={`full-${i}`} 
-          className="w-5 h-5 text-amber-500 fill-amber-500" 
+        <Star
+          key={`full-${i}`}
+          className="w-5 h-5 text-amber-500 fill-amber-500"
         />
       );
     }
-    
+
     if (hasHalfStar) {
       stars.push(
-        <StarHalf 
-          key="half" 
-          className="w-5 h-5 text-amber-500 fill-amber-500" 
+        <StarHalf
+          key="half"
+          className="w-5 h-5 text-amber-500 fill-amber-500"
         />
       );
     }
-    
+
     const emptyStars = 5 - stars.length;
     for (let i = 0; i < emptyStars; i++) {
       stars.push(
-        <Star 
-          key={`empty-${i}`} 
-          className="w-5 h-5 text-amber-200 fill-amber-200" 
+        <Star
+          key={`empty-${i}`}
+          className="w-5 h-5 text-amber-200 fill-amber-200"
         />
       );
     }
-    
+
     return (
       <div className="flex items-center gap-1">
         {stars}
@@ -82,18 +82,18 @@ const Feedback = () => {
   };
 
   return (
-    <div className="min-h-screen bg-amber-50 p-6 relative overflow-hidden">
+    <div className="min-h-screen bg-[#f4f3f3] p-6 relative overflow-hidden">
       {/* Background decorations */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
-        <Cake className="absolute top-20 left-10 w-16 h-16 text-amber-200 opacity-30 animate-float" />
-        <Candy className="absolute bottom-1/4 right-20 w-14 h-14 text-amber-200 opacity-30 animate-float-delay" />
-        <IceCream className="absolute top-1/3 left-1/4 w-16 h-16 text-amber-200 opacity-30 animate-float" />
-        <Cookie className="absolute bottom-20 right-1/4 w-16 h-16 text-amber-200 opacity-30 animate-float-delay" />
+      <div className="fixed inset-0 overflow-hidden pointer-events-none z-0 opacity-10">
+        <CandyCane className="absolute top-20 left-10 w-32 h-32 text-amber-500" />
+        <IceCream className="absolute bottom-40 left-1/4 w-36 h-36 text-amber-500" />
+        <Cake className="absolute bottom-20 right-10 w-40 h-40 text-amber-500" />
+        <Dessert className="absolute top-1/4 right-1/3 w-24 h-24 text-amber-500 transform rotate-12" />
       </div>
 
       <div className="max-w-4xl mx-auto relative z-10">
         <div className="text-left mb-8">
-        <h1 className="text-3xl font-bold text-amber-800 mb-2 flex items-center gap-2">
+          <h1 className="text-3xl font-bold text-amber-800 mb-2 flex items-center gap-2">
             <MessageSquare className="w-8 h-8" />
             Customer Reviews
           </h1>
@@ -102,8 +102,8 @@ const Feedback = () => {
 
         <div className="space-y-6">
           {reviews.map((review) => (
-            <div 
-              key={review.id} 
+            <div
+              key={review.id}
               className="bg-white/95 rounded-lg shadow p-6 border border-amber-100 backdrop-blur-sm"
             >
               <div className="flex flex-col sm:flex-row justify-between gap-4 mb-4">

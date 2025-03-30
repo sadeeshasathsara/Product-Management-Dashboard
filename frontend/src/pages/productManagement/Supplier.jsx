@@ -32,7 +32,8 @@ const Supplier = () => {
   };
 
   return (
-    <div className="min-h-screen bg-amber-50 p-6 relative overflow-hidden">
+    <div className="min-h-screen bg-[#f4f3f3] p-6 relative overflow-hidden">
+      {/* Background Sweet Icons */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none z-0 opacity-10">
         <CandyCane className="absolute top-20 left-10 w-32 h-32 text-amber-500" />
         <IceCream className="absolute bottom-40 left-1/4 w-36 h-36 text-amber-500" />
@@ -48,7 +49,7 @@ const Supplier = () => {
           </h1>
           <p className="text-amber-600 mt-1">Our trusted partners in sweet success</p>
         </div>
-        
+
         <div className="flex justify-end mb-6">
           <button
             onClick={() => setShowModal(true)}
@@ -74,21 +75,17 @@ const Supplier = () => {
         {/* Modal Popup without Background Animation */}
         {showModal && (
           <div className="fixed inset-0 bg-[#00000095] flex items-center justify-center p-4 z-50">
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.8 }}
-              transition={{ duration: 0.3 }}
-              className="bg-white rounded-xl shadow-lg w-full max-w-md"
-            >
-              <SupplierForm
-                supplier={editingSupplier}
-                onSubmit={handleAddSupplier}
-                onCancel={() => {
-                  setShowModal(false);
-                  setEditingSupplier(null);
-                }}
-              />
+            <motion.div>
+              <div className="bg-white rounded-xl shadow-lg w-full max-w-md">
+                <SupplierForm
+                  supplier={editingSupplier}
+                  onSubmit={handleAddSupplier}
+                  onCancel={() => {
+                    setShowModal(false);
+                    setEditingSupplier(null);
+                  }}
+                />
+              </div>
             </motion.div>
           </div>
         )}

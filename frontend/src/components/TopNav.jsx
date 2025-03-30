@@ -2,11 +2,11 @@ import { Bell } from "lucide-react";
 
 const TopNav = () => {
   return (
-    <header className="bg-amber-50 flex items-center justify-end p-4 border-b border-gray-300">
+    <header className="bg-[#101828] flex items-center justify-end p-4 border-b border-gray-300">
       {/* Right Section: Notifications & User Profile */}
       <div className="flex items-center space-x-4">
         {/* Order Notifications */}
-        <button 
+        <button
           className="relative p-2 rounded-full hover:bg-amber-100 transition-colors"
           aria-label="Order Notifications"
         >

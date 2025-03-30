@@ -1,54 +1,60 @@
-import { RefreshCw, LayoutDashboard } from "lucide-react";
+import { RefreshCw, LayoutDashboard, CandyCane, IceCream, Cake, Dessert } from "lucide-react";
 import MetricCard from "../../components/Dashboard/MetricCard";
 import SalesTrendCard from "../../components/Dashboard/SalesTrendCard";
 import StockMovementCard from "../../components/Dashboard/StockMovementCard";
 import LowStockAlertCard from "../../components/Dashboard/LowStockAlertCard";
-import { 
-  Boxes, PackageCheck, AlertCircle, 
-  Clock, PackageX 
+import {
+  Boxes, PackageCheck, AlertCircle,
+  Clock, PackageX
 } from "lucide-react";
 
 const Dashboard = () => {
   const metrics = [
-    { 
-      title: "Total Sweets Value", 
-      value: "$48,750", 
-      change: "+15%", 
+    {
+      title: "Total Sweets Value",
+      value: "$48,750",
+      change: "+15%",
       trend: "up",
       icon: <Boxes className="text-amber-600" size={24} />
     },
-    { 
-      title: "Sweet Varieties", 
-      value: "128 items", 
-      change: "+8%", 
+    {
+      title: "Sweet Varieties",
+      value: "128 items",
+      change: "+8%",
       trend: "up",
       icon: <PackageCheck className="text-amber-500" size={24} />
     },
-    { 
-      title: "Low Stock Alerts", 
-      value: "9 items", 
-      change: "+3", 
+    {
+      title: "Low Stock Alerts",
+      value: "9 items",
+      change: "+3",
       trend: "down",
       icon: <AlertCircle className="text-amber-500" size={24} />
     },
-    { 
-      title: "Out-of-Stock", 
-      value: "5 items", 
-      change: "-2", 
+    {
+      title: "Out-of-Stock",
+      value: "5 items",
+      change: "-2",
       trend: "up",
       icon: <PackageX className="text-amber-500" size={24} />
     },
-    { 
-      title: "Incoming Ingredients", 
-      value: "7 orders", 
-      change: "+4", 
+    {
+      title: "Incoming Ingredients",
+      value: "7 orders",
+      change: "+4",
       trend: "up",
       icon: <Clock className="text-amber-500" size={24} />
     },
   ];
 
   return (
-    <div className="p-8 bg-amber-50 min-h-screen">
+    <div className="p-8 bg-[#f4f3f3] min-h-screen">
+      <div className="fixed inset-0 overflow-hidden pointer-events-none z-0 opacity-10">
+        <CandyCane className="absolute top-20 left-10 w-32 h-32 text-amber-500" />
+        <IceCream className="absolute bottom-40 left-1/4 w-36 h-36 text-amber-500" />
+        <Cake className="absolute bottom-20 right-10 w-40 h-40 text-amber-500" />
+        <Dessert className="absolute top-1/4 right-1/3 w-24 h-24 text-amber-500 transform rotate-12" />
+      </div>
       <div className="max-w-7xl mx-auto">
         {/* Header Section */}
         <div className="mb-10">
