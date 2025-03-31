@@ -51,7 +51,7 @@ const EditProductForm = ({ product, onSubmit, onClose }) => {
         // Handle images
         if (product.images && Array.isArray(product.images)) {
             const imageUrls = product.images.map(img =>
-                img.startsWith('http') ? img : `http://localhost:5000/uploads/${img}`
+                img.startsWith('http') ? img : `http://localhost:5000${img}`
             );
             setPreviewImages(imageUrls);
         }
@@ -86,7 +86,11 @@ const EditProductForm = ({ product, onSubmit, onClose }) => {
     }, []);
 
     const handleNameChange = (e) => {
-        setProductName(e.target.value);
+        const newValue = e.target.value;
+        // Allow only letters and spaces; disallow numbers and special characters
+        if (/^[A-Za-z\s]*$/.test(newValue)) {
+            setProductName(newValue);
+        }
     };
 
     const handleDescriptionChange = (e) => {
@@ -143,24 +147,25 @@ const EditProductForm = ({ product, onSubmit, onClose }) => {
         setError(null);
 
         try {
-            // Extract image filenames from full URLs
             const imageFilenames = previewImages.map(url => {
-                // If it's a full URL, extract just the filename
                 if (url.includes('/uploads/')) {
                     return url.split('/uploads/')[1];
+                } else if (url.startsWith('blob:')) {
+                    // Extracts the portion after the last slash from the blob URL
+                    return url.split('/').pop();
                 }
                 return url;
             });
 
-            // Build the updated product object matching backend expectations
             const updatedProduct = {
                 id: product.id,
                 name: productName,
                 description,
-                categories: selectedCategories.map(cat => cat.name), // Array of category names
-                images: imageFilenames, // Array of image filenames
-                price
+                categories: selectedCategories.map(cat => cat.name),
+                images: imageFilenames
             };
+
+            console.log(imageFilenames);
 
             // Send update request to backend
             const response = await axios.put(
@@ -305,20 +310,6 @@ const EditProductForm = ({ product, onSubmit, onClose }) => {
                     </div>
                 </div>
 
-                {/* Price */}
-                <div>
-                    <label className="block text-sm font-medium text-amber-700 mb-1">Price (Rs.)</label>
-                    <input
-                        type="number"
-                        value={price}
-                        onChange={handlePriceChange}
-                        min="0"
-                        step="0.01"
-                        className="w-full px-3 py-2 border border-amber-200 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
-                        placeholder="0.00"
-                    />
-                </div>
-
                 {/* Description */}
                 <div>
                     <label className="block text-sm font-medium text-amber-700 mb-1">Description</label>
@@ -345,8 +336,8 @@ const EditProductForm = ({ product, onSubmit, onClose }) => {
                         type="submit"
                         disabled={isSubmitting}
                         className={`w-full bg-gradient-to-r from-amber-500 to-orange-500 text-white py-3 px-4 rounded-md transition-all duration-300 ${isSubmitting
-                                ? 'opacity-70 cursor-not-allowed'
-                                : 'hover:from-amber-600 hover:to-orange-600 focus:outline-none focus:ring-2 focus:ring-amber-500'
+                            ? 'opacity-70 cursor-not-allowed'
+                            : 'hover:from-amber-600 hover:to-orange-600 focus:outline-none focus:ring-2 focus:ring-amber-500'
                             }`}
                     >
                         {isSubmitting ? 'Updating...' : 'Update Product'}

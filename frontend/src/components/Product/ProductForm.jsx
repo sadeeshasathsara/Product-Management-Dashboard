@@ -101,11 +101,27 @@ const ProductForm = ({ onSubmit }) => {
     setCategories(categories.filter(cat => cat !== category));
   };
 
-  const addCustomCategory = () => {
-    if (categoryInput.trim() !== '' && !categories.includes(categoryInput.trim())) {
-      setCategories([...categories, categoryInput.trim()]);
-      setCategoryInput('');
+  const addCustomCategory = async () => {
+    const newCats = categoryInput.split(',').map(cat => cat.trim()).filter(cat => cat !== '');
+    let newCategoriesToAdd = [];
+    for (const cat of newCats) {
+      if (!categories.includes(cat)) {
+        // If the category is not in the suggestions, add it via backend
+        if (!availableCategories.includes(cat)) {
+          try {
+            await axios.post('http://localhost:5000/api/product-management/category', { name: cat });
+            log('New category created:', cat);
+          } catch (err) {
+            console.error('Error creating new category:', err);
+          }
+        }
+        newCategoriesToAdd.push(cat);
+      }
     }
+    if (newCategoriesToAdd.length) {
+      setCategories([...categories, ...newCategoriesToAdd]);
+    }
+    setCategoryInput('');
   };
 
   const handleFormSubmit = (e) => {
