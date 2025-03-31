@@ -1,31 +1,48 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import StockAddingForm from '../../components/Stock/StockAddingForm';
 import StockDetails from '../../components/Stock/StockDetails';
-import { Package, Boxes } from 'lucide-react';
+import { Package, Boxes, Loader } from 'lucide-react';
+import axios from 'axios';
 
 const Stock = () => {
-  const [stockEntries, setStockEntries] = useState([
-    {
-      id: 1,
-      date: '2023-05-15',
-      supplier: 'Tech Distributors Inc.',
-      products: [
-        { name: 'Laptop Dell XPS 13', quantity: 5, buyPrice: 899.99, sellPrice: 1199.99 },
-        { name: 'iPhone 15 Pro', quantity: 10, buyPrice: 999.99, sellPrice: 1099.99 }
-      ],
-      totalValue: 14499.85
-    },
-    {
-      id: 2,
-      date: '2023-05-10',
-      supplier: 'Global Electronics Supply',
-      products: [
-        { name: 'Samsung Galaxy S25', quantity: 8, buyPrice: 799.99, sellPrice: 899.99 },
-        { name: 'AirPods Pro 2', quantity: 15, buyPrice: 199.99, sellPrice: 249.99 }
-      ],
-      totalValue: 9399.77
-    }
-  ]);
+  const [stockEntries, setStockEntries] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Fetch stocks from the backend and update state with transformed data
+  useEffect(() => {
+    setIsLoading(true);
+    axios.get('http://localhost:5000/api/product-management/stock')
+      .then((response) => {
+        if (response.data && response.data.stocks) {
+          const transformedStocks = response.data.stocks.map(stock => {
+            // Transform each stock to include the expected properties:
+            // Use current date as a placeholder if no date is provided,
+            // and use supplierId as the supplier (or transform as needed)
+            // Calculate totalValue by summing up product prices * quantity.
+            const totalValue = stock.products.reduce((acc, prod) => acc + (prod.price * prod.quantity), 0);
+            return {
+              id: stock.id,
+              date: new Date().toISOString().split("T")[0],
+              supplier: stock.supplierId,
+              products: stock.products.map(prod => ({
+                name: prod.product, // using product id as name if no name is provided
+                quantity: prod.quantity,
+                buyPrice: prod.price,
+                sellPrice: prod.sellingPrice
+              })),
+              totalValue: totalValue
+            };
+          });
+          setStockEntries(transformedStocks);
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching stocks:", error);
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  }, []);
 
   const handleStockAdded = (newStockEntry) => {
     setStockEntries([newStockEntry, ...stockEntries]);
@@ -49,7 +66,15 @@ const Stock = () => {
         </div>
 
         <StockAddingForm onStockAdded={handleStockAdded} />
-        <StockDetails stockEntries={stockEntries} />
+
+        {isLoading ? (
+          <div className="flex flex-col items-center justify-center p-12 bg-white rounded-lg shadow-md">
+            <Loader className="w-12 h-12 text-amber-500 animate-spin mb-4" />
+            <p className="text-amber-700 font-medium">Loading inventory data...</p>
+          </div>
+        ) : (
+          <StockDetails stockEntries={stockEntries} />
+        )}
       </div>
 
       <style jsx global>{`

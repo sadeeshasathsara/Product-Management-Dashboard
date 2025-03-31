@@ -1,16 +1,38 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Plus, Truck, CandyCane, IceCream, Cake, Dessert } from 'lucide-react';
+import { Plus, Truck, CandyCane, IceCream, Cake, Dessert, Loader } from 'lucide-react';
 import SupplierForm from '../../components/Supplier/SupplierForm';
 import SupplierList from '../../components/Supplier/SupplierList';
+import axios from 'axios';
 
 const Supplier = () => {
-  const [suppliers, setSuppliers] = useState([
-    { id: 1, name: 'Sweet Ingredients Co.', phone: '1234567890', email: 'contact@sweetco.com', address: '123 Sugar Lane' },
-    { id: 2, name: 'Chocolate Suppliers Ltd', phone: '9876543210', email: 'info@chocolatesuppliers.com', address: '456 Cocoa Street' }
-  ]);
+  const [suppliers, setSuppliers] = useState([]);
   const [editingSupplier, setEditingSupplier] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Fetch suppliers from backend and update the suppliers list
+  useEffect(() => {
+    setIsLoading(true);
+    axios.get('http://localhost:5000/api/product-management/supplier')
+      .then((response) => {
+        // Map the backend data to match your supplier object structure
+        const fetchedSuppliers = response.data.map(supplier => ({
+          id: supplier._id,
+          name: supplier.name,
+          phone: supplier.phoneNumber,
+          email: supplier.email,
+          address: supplier.address
+        }));
+        setSuppliers(fetchedSuppliers);
+      })
+      .catch((error) => {
+        console.error("Error fetching suppliers:", error);
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  }, []);
 
   const handleAddSupplier = (supplier) => {
     if (editingSupplier) {
@@ -60,23 +82,30 @@ const Supplier = () => {
           </button>
         </div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          <SupplierList
-            suppliers={suppliers}
-            onEdit={openEditModal}
-            onDelete={handleDeleteSupplier}
-          />
-        </motion.div>
+        {isLoading ? (
+          <div className="bg-white rounded-lg shadow-md p-10 flex flex-col items-center justify-center">
+            <Loader className="w-12 h-12 text-amber-500 animate-spin mb-4" />
+            <p className="text-amber-700 font-medium">Loading supplier data...</p>
+          </div>
+        ) : (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <SupplierList
+              suppliers={suppliers}
+              onEdit={openEditModal}
+              onDelete={handleDeleteSupplier}
+            />
+          </motion.div>
+        )}
 
         {/* Modal Popup without Background Animation */}
         {showModal && (
-          <div className="fixed inset-0 bg-[#00000095] flex items-center justify-center p-4 z-50">
-            <motion.div>
-              <div className="bg-white rounded-xl shadow-lg w-full max-w-md">
+          <div className="fixed inset-0 bg-[#00000095] flex items-center justify-center p-4 z-50 w-screen">
+            <motion.div className=" w-full flex items-center justify-center">
+              <div className="bg-white rounded-xl shadow-lg w-3/4">
                 <SupplierForm
                   supplier={editingSupplier}
                   onSubmit={handleAddSupplier}

@@ -19,8 +19,8 @@ const StockDetails = ({ stockEntries }) => {
           </div>
         ) : (
           stockEntries.map((entry) => (
-            <div 
-              key={entry.id} 
+            <div
+              key={entry.id}
               className="border border-blue-100 rounded-lg p-4 hover:shadow-md transition-shadow"
             >
               <div className="flex flex-col sm:flex-row justify-between gap-4 mb-4">
@@ -30,7 +30,7 @@ const StockDetails = ({ stockEntries }) => {
                     Added on {entry.date} • Supplier: {entry.supplier}
                   </p>
                   <p className="text-amber-800 font-medium">
-                    Total Value: ${entry.totalValue.toFixed(2)}
+                    Total Value: Rs.{entry.totalValue.toFixed(2)}
                   </p>
                 </div>
                 <div className="flex-shrink-0">
@@ -39,7 +39,7 @@ const StockDetails = ({ stockEntries }) => {
                   </div>
                 </div>
               </div>
-              
+
               <div className="mt-4 border-t border-amber-100 pt-4">
                 <h4 className="text-md font-semibold text-amber-800 mb-3">Products:</h4>
                 <div className="overflow-x-auto">
@@ -58,9 +58,9 @@ const StockDetails = ({ stockEntries }) => {
                         <tr key={idx} className="hover:bg-blue-50">
                           <td className="px-4 py-2 whitespace-nowrap text-amber-900">{product.name}</td>
                           <td className="px-4 py-2 whitespace-nowrap text-amber-800">{product.quantity}</td>
-                          <td className="px-4 py-2 whitespace-nowrap text-amber-800">${product.buyPrice.toFixed(2)}</td>
-                          <td className="px-4 py-2 whitespace-nowrap text-amber-800">${product.sellPrice.toFixed(2)}</td>
-                          <td className="px-4 py-2 whitespace-nowrap text-amber-800">${(product.quantity * product.buyPrice).toFixed(2)}</td>
+                          <td className="px-4 py-2 whitespace-nowrap text-amber-800">Rs.{product.buyPrice.toFixed(2)}</td>
+                          <td className="px-4 py-2 whitespace-nowrap text-amber-800">Rs.{product.sellPrice.toFixed(2)}</td>
+                          <td className="px-4 py-2 whitespace-nowrap text-amber-800">Rs.{(product.quantity * product.buyPrice).toFixed(2)}</td>
                         </tr>
                       ))}
                     </tbody>

@@ -27,11 +27,11 @@ router.put('/product', upload.array('images', 5), updateProduct)
 router.delete('/product', deleteProduct)
 
 //Supplier routes
-router.post('/suplier', createSupplier)
-router.get('/suplier/:id', getSuplierById)
-router.get('/suplier', getAllSuppliers)
-router.put('/suplier', updateSupplier)
-router.delete('/suplier', deleteSupplier)
+router.post('/supplier', createSupplier)
+router.get('/supplier/:id', getSuplierById)
+router.get('/supplier', getAllSuppliers)
+router.put('/supplier', updateSupplier)
+router.delete('/supplier', deleteSupplier)
 
 //Stock routes
 router.post('/stock', createStock)

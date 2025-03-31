@@ -1,24 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Search, Plus, Trash2, Save, Package } from 'lucide-react';
+import axios from 'axios';
+import { toast } from 'react-toastify';
 
 const StockAddingForm = ({ onStockAdded }) => {
-  // Sample data - would typically come from API
-  const allProducts = [
-    { id: 1, name: 'Laptop Dell XPS 13', buyPrice: 899.99, sellPrice: 1199.99 },
-    { id: 2, name: 'iPhone 15 Pro', buyPrice: 999.99, sellPrice: 1099.99 },
-    { id: 3, name: 'Samsung Galaxy S25', buyPrice: 799.99, sellPrice: 899.99 },
-    { id: 4, name: 'AirPods Pro 2', buyPrice: 199.99, sellPrice: 249.99 },
-    { id: 5, name: 'iPad Air', buyPrice: 599.99, sellPrice: 699.99 },
-  ];
+  // Replace sample arrays with state variables that will be filled from the API.
+  const [allProducts, setAllProducts] = useState([]);
+  const [allSuppliers, setAllSuppliers] = useState([]);
 
-  const allSuppliers = [
-    { id: 1, name: 'Tech Distributors Inc.' },
-    { id: 2, name: 'Global Electronics Supply' },
-    { id: 3, name: 'SmartTech Wholesale' },
-    { id: 4, name: 'Digital Inventory Partners' },
-  ];
-
-  // State
+  // Existing states
   const [productSearch, setProductSearch] = useState('');
   const [supplierSearch, setSupplierSearch] = useState('');
   const [selectedProducts, setSelectedProducts] = useState([]);
@@ -26,19 +16,48 @@ const StockAddingForm = ({ onStockAdded }) => {
   const [productSearchResults, setProductSearchResults] = useState([]);
   const [supplierSearchResults, setSupplierSearchResults] = useState([]);
 
+  // Fetch products from API
+  useEffect(() => {
+    axios.get('http://localhost:5000/api/product-management/product')
+      .then(response => {
+        if (response.data && response.data.products) {
+          setAllProducts(response.data.products);
+        }
+      })
+      .catch(error => {
+        console.error('Error fetching products:', error);
+      });
+  }, []);
+
+  // Fetch suppliers from API
+  useEffect(() => {
+    axios.get('http://localhost:5000/api/product-management/supplier')
+      .then(response => {
+        if (response.data) {
+          setAllSuppliers(response.data);
+        }
+      })
+      .catch(error => {
+        console.error('Error fetching suppliers:', error);
+      });
+  }, []);
+
+  console.log(allSuppliers);
+
+
   // Handle product search
   const handleProductSearch = (e) => {
     const query = e.target.value;
     setProductSearch(query);
-    
+
     if (query.trim() === '') {
       setProductSearchResults([]);
       return;
     }
-    
+
     const filteredProducts = allProducts
-      .filter(product => 
-        product.name.toLowerCase().includes(query.toLowerCase()) && 
+      .filter(product =>
+        product.name.toLowerCase().includes(query.toLowerCase()) &&
         !selectedProducts.some(p => p.id === product.id)
       );
     setProductSearchResults(filteredProducts);
@@ -94,22 +113,53 @@ const StockAddingForm = ({ onStockAdded }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (selectedProducts.length === 0 || !selectedSupplier) return;
-    
-    const newStockEntry = {
-      id: Date.now(),
-      date: new Date().toISOString().split('T')[0],
-      supplier: selectedSupplier.name,
-      products: selectedProducts,
-      totalValue: selectedProducts.reduce((sum, product) => sum + (product.buyPrice * product.quantity), 0)
+
+    // Build the payload as expected by the backend
+    const payload = {
+      supplierId: selectedSupplier._id || selectedSupplier.id,
+      products: selectedProducts.map(product => ({
+        id: product.id,
+        quantity: product.quantity,
+        price: product.buyPrice,
+        manufactureDate: new Date().toISOString(), // using current date for manufactureDate
+        expirationDate: new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString(), // default expiration: one year later
+        sellingPrice: product.sellPrice,
+        textReview: "",
+        customer: null
+      }))
     };
-    
-    onStockAdded(newStockEntry);
-    
-    // Reset form
-    setSelectedProducts([]);
-    setSelectedSupplier(null);
-    setProductSearch('');
-    setSupplierSearch('');
+
+    axios.post('http://localhost:5000/api/product-management/stock', payload)
+      .then(response => {
+        toast.success(response.data.message || "Stock created successfully", {
+          position: 'top-right',
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true
+        });
+        // Optionally update the parent component with the new stock.
+        if (response.data.stock) {
+          onStockAdded(response.data.stock);
+        }
+        // Reset form
+        setSelectedProducts([]);
+        setSelectedSupplier(null);
+        setProductSearch('');
+        setSupplierSearch('');
+        window.location.reload();
+      })
+      .catch(error => {
+        toast.error(error.response?.data?.message || "Failed to create stock", {
+          position: 'top-right',
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true
+        });
+      });
   };
 
   return (
@@ -121,7 +171,7 @@ const StockAddingForm = ({ onStockAdded }) => {
         </h2>
         <p className="text-amber-600">Add new products to your inventory</p>
       </div>
-      
+
       <form onSubmit={handleSubmit}>
         {/* Product Search Section */}
         <div className="mb-6">
@@ -140,7 +190,7 @@ const StockAddingForm = ({ onStockAdded }) => {
               onChange={handleProductSearch}
             />
           </div>
-          
+
           {/* Search Results Dropdown */}
           {productSearchResults.length > 0 && (
             <div className="mt-2 border border-amber-200 rounded-md shadow-sm bg-white max-h-60 overflow-auto">
@@ -166,7 +216,7 @@ const StockAddingForm = ({ onStockAdded }) => {
             </div>
           )}
         </div>
-        
+
         {/* Selected Products Table */}
         {selectedProducts.length > 0 && (
           <div className="mb-6">
@@ -188,7 +238,7 @@ const StockAddingForm = ({ onStockAdded }) => {
                       <td className="px-6 py-4 whitespace-nowrap text-amber-900">{product.name}</td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
-                          <span className="mr-1 text-amber-800">$</span>
+                          <span className="mr-1 text-amber-800">Rs.</span>
                           <input
                             type="number"
                             min="0"
@@ -201,7 +251,7 @@ const StockAddingForm = ({ onStockAdded }) => {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
-                          <span className="mr-1 text-amber-800">$</span>
+                          <span className="mr-1 text-amber-800">Rs.</span>
                           <input
                             type="number"
                             min="0"
@@ -237,7 +287,7 @@ const StockAddingForm = ({ onStockAdded }) => {
             </div>
           </div>
         )}
-        
+
         {/* Supplier Search Section */}
         <div className="mb-6">
           <label className="block text-amber-700 font-semibold mb-2">
@@ -255,21 +305,21 @@ const StockAddingForm = ({ onStockAdded }) => {
               onChange={(e) => {
                 const query = e.target.value;
                 setSupplierSearch(query);
-                
+
                 if (query.trim() === '') {
                   setSupplierSearchResults([]);
                   return;
                 }
-                
+
                 const filteredSuppliers = allSuppliers
-                  .filter(supplier => 
+                  .filter(supplier =>
                     supplier.name.toLowerCase().includes(query.toLowerCase())
                   );
                 setSupplierSearchResults(filteredSuppliers);
               }}
             />
           </div>
-          
+
           {/* Supplier Search Results */}
           {supplierSearchResults.length > 0 && (
             <div className="mt-2 border border-amber-200 rounded-md shadow-sm bg-white max-h-40 overflow-auto">
@@ -285,7 +335,7 @@ const StockAddingForm = ({ onStockAdded }) => {
             </div>
           )}
         </div>
-        
+
         {/* Selected Supplier */}
         {selectedSupplier && (
           <div className="mb-6 p-4 border border-green-200 rounded-md bg-green-50">
@@ -293,7 +343,7 @@ const StockAddingForm = ({ onStockAdded }) => {
             <p className="text-green-700">{selectedSupplier.name}</p>
           </div>
         )}
-        
+
         {/* Submit Button */}
         <div className="flex justify-end">
           <button
