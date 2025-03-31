@@ -94,7 +94,7 @@ const Product = () => {
       <div className="max-w-4xl mx-auto relative z-10">
         <div className="text-left mb-8">
           <h1 className="text-3xl font-bold text-amber-800 flex items-center gap-2">
-            <Dessert className="w-8 h-8" />
+            <Candy className="w-8 h-8" />
             Inventory Items
           </h1>
           <p className="text-amber-600 mt-1">Efficiently track and manage your products</p>
