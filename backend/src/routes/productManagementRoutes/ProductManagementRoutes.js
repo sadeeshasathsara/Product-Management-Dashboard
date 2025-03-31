@@ -23,15 +23,15 @@ router.delete('/category', deleteCategory)
 router.post('/product', upload.array('images', 5), createProduct)
 router.get('/product/:id', getProductById)
 router.get('/product', getAllProducts)
-router.put('/product', updateProduct)
+router.put('/product', upload.array('images', 5), updateProduct)
 router.delete('/product', deleteProduct)
 
 //Supplier routes
-router.post('/suplier', createSupplier)
-router.get('/suplier/:id', getSuplierById)
-router.get('/suplier', getAllSuppliers)
-router.put('/suplier', updateSupplier)
-router.delete('/suplier', deleteSupplier)
+router.post('/supplier', createSupplier)
+router.get('/supplier/:id', getSuplierById)
+router.get('/supplier', getAllSuppliers)
+router.put('/supplier', updateSupplier)
+router.delete('/supplier', deleteSupplier)
 
 //Stock routes
 router.post('/stock', createStock)
@@ -43,8 +43,8 @@ router.post('/stock/product', addProductsToStock)
 router.delete('/stock/product', removeProductsFromStock)
 
 //Search query routes
-router.get('/product/q', searchProducts)
-router.get('/supplier/q', searchSuppliers)
+router.get('/q/product', searchProducts)
+router.get('/q/supplier', searchSuppliers)
 
 //Report routes
 router.get('/report/stock-summary', generateStockSummaryReport)

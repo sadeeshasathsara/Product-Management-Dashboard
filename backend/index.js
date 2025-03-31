@@ -3,6 +3,8 @@ import express from 'express';
 import cors from 'cors';
 import mongoose from 'mongoose';
 import bodyParser from 'body-parser';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 import ProductManagementRoutes from './src/routes/productManagementRoutes/ProductManagementRoutes.js';
 
@@ -14,6 +16,12 @@ app.use(cors());
 
 // Routes
 app.use('/api/product-management', ProductManagementRoutes);
+
+
+// uploads access route
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+app.use('/uploads', express.static(path.join(__dirname, './src/uploads')));
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGO_URI)
