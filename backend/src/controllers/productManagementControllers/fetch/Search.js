@@ -35,10 +35,7 @@ export const searchProducts = async (req, res) => {
         const productIds = products.map((product) => product._id);
         const images = await ProductImagesModel.find({ product: { $in: productIds } });
 
-        const productCategories = await ProductCategories.find({ product: { $in: productIds } });
-
-        console.log(`${productCategories}`);
-
+        const productCategories = await ProductCategories.find({ Product: { $in: productIds } });
 
         const categoryNamesMap = {};
         await Promise.all(productCategories.map(async (pc) => {
@@ -57,6 +54,7 @@ export const searchProducts = async (req, res) => {
                 .map((image) => image.url);
 
             return {
+                id: product._id,
                 name: product.name,
                 description: product.description,
                 categories: categoryNamesMap[product._id] || [],
@@ -88,8 +86,9 @@ export const searchSuppliers = async (req, res) => {
         const dataToSend = suppliers.map((supplier) => ({
             id: supplier._id,
             name: supplier.name,
-            contact: supplier.contact,
             address: supplier.address,
+            contact: supplier.phoneNumber,
+            email: supplier.email
         }));
 
         res.status(200).json({ suppliers: dataToSend });

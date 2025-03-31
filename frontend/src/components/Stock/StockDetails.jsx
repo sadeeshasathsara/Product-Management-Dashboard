@@ -1,7 +1,36 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Boxes, Truck } from 'lucide-react';
+import axios from 'axios';
 
 const StockDetails = ({ stockEntries }) => {
+  const [productNames, setProductNames] = useState({});
+
+  useEffect(() => {
+    const fetchProductNames = async () => {
+      const names = {};
+      await Promise.all(
+        stockEntries.flatMap(entry =>
+          entry.products.map(async (product) => {
+            try {
+              const response = await axios.get(`http://localhost:5000/api/product-management/product/${product.name}`);
+              if (response.data && response.data.product) {
+                names[product.name] = response.data.product.name;
+              } else {
+                names[product.name] = 'Unknown Product';
+              }
+            } catch (error) {
+              console.error("Error fetching product name:", error);
+              names[product.name] = 'Error Loading';
+            }
+          })
+        )
+      );
+      setProductNames(names);
+    };
+
+    fetchProductNames();
+  }, [stockEntries]);
+
   return (
     <div className="bg-white/95 rounded-lg shadow p-6 border border-amber-100 backdrop-blur-sm">
       <div className="text-left mb-6">
@@ -56,7 +85,9 @@ const StockDetails = ({ stockEntries }) => {
                     <tbody className="bg-white divide-y divide-blue-200">
                       {entry.products.map((product, idx) => (
                         <tr key={idx} className="hover:bg-blue-50">
-                          <td className="px-4 py-2 whitespace-nowrap text-amber-900">{product.name}</td>
+                          <td className="px-4 py-2 whitespace-nowrap text-amber-900">
+                            {productNames[product.name] || 'Loading...'}
+                          </td>
                           <td className="px-4 py-2 whitespace-nowrap text-amber-800">{product.quantity}</td>
                           <td className="px-4 py-2 whitespace-nowrap text-amber-800">Rs.{product.buyPrice.toFixed(2)}</td>
                           <td className="px-4 py-2 whitespace-nowrap text-amber-800">Rs.{product.sellPrice.toFixed(2)}</td>

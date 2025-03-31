@@ -7,6 +7,7 @@ import Stock from '../../pages/productManagement/Stock'
 import Feedback from '../../pages/productManagement/Feedback'
 import Supplier from '../../pages/productManagement/Supplier'
 import RedirectComponent from './Redirect'
+import Reports from '../../pages/productManagement/Reports'
 
 
 function ProductManagement() {
@@ -19,7 +20,7 @@ function ProductManagement() {
                 <Route path="Stock" element={<Stock />} />
                 <Route path="Supplier" element={<Supplier />} />
                 <Route path="Feedback" element={<Feedback />} />
-
+                <Route path="reports" element={<Reports />} />
             </Route>
         </Routes>
     )

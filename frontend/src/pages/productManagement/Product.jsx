@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Plus, Search, CandyCane, IceCream, Cake, Dessert, Candy } from 'lucide-react';
+import { X, Plus, Search, CandyCane, IceCream, Cake, Dessert, Candy, FilterX, Tag } from 'lucide-react';
 import axios from 'axios';
 import ProductForm from '../../components/Product/ProductForm';
 import ProductList from '../../components/Product/ProductList';
@@ -9,35 +9,100 @@ import EditProductForm from '../../components/Product/EditProductForm';
 
 const Product = () => {
   const [products, setProducts] = useState([]);
-  const [filteredProducts, setFilteredProducts] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [categories, setCategories] = useState([]);
+  const [selectedCategories, setSelectedCategories] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const searchTimeoutRef = useRef(null);
 
-  // Fetch products from backend API
+  // Initial fetch of products
   useEffect(() => {
-    setIsLoading(true);
-    axios.get('http://localhost:5000/api/product-management/product')
-      .then(response => {
-        // Assuming your API returns an array of products directly
-        setProducts(response.data.products);
-        setIsLoading(false);
-      })
-      .catch(error => {
-        console.error("Error fetching products:", error);
-        setIsLoading(false);
-      });
+    fetchProducts();
+    fetchCategories();
   }, []);
 
+  // Fetch all categories for filters
+  const fetchCategories = async () => {
+    try {
+      const response = await axios.get('http://localhost:5000/api/product-management/category');
+      setCategories(response.data || []);
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+    }
+  };
+
+  // Fetch products with or without search parameters
+  const fetchProducts = async (searchParams = {}) => {
+    setIsLoading(true);
+    try {
+      const params = new URLSearchParams();
+
+      if (searchParams.name) {
+        params.append('name', searchParams.name);
+      }
+
+      if (searchParams.categories && searchParams.categories.length > 0) {
+        searchParams.categories.forEach(category => {
+          params.append('categories', category);
+        });
+      }
+
+      const response = await axios.get(`http://localhost:5000/api/product-management/q/product?${params.toString()}`);
+      setProducts(response.data.products || []);
+    } catch (error) {
+      console.error("Error fetching products:", error);
+    } finally {
+      setIsLoading(false);
+      setIsSearching(false);
+    }
+  };
+
+  // Effect for real-time search when typing
   useEffect(() => {
-    setFilteredProducts(
-      products.filter((product) =>
-        product.name.toLowerCase().includes(searchQuery.toLowerCase())
-      )
+    // Clear any existing timeout
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+
+    // Set loading state if we have search criteria
+    if (searchQuery.length > 0 || selectedCategories.length > 0) {
+      setIsSearching(true);
+    }
+
+    // Set a new timeout to debounce the search
+    searchTimeoutRef.current = setTimeout(() => {
+      fetchProducts({
+        name: searchQuery,
+        categories: selectedCategories
+      });
+    }, 500); // 500ms debounce time
+
+    // Cleanup function to clear timeout if the component unmounts or searchQuery changes again
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+    };
+  }, [searchQuery, selectedCategories]);
+
+  const toggleCategory = (category) => {
+    setSelectedCategories(prev =>
+      prev.includes(category)
+        ? prev.filter(c => c !== category)
+        : [...prev, category]
     );
-  }, [searchQuery, products]);
+    // No need to manually call fetchProducts as the useEffect will handle it
+  };
+
+  const clearFilters = () => {
+    setSearchQuery('');
+    setSelectedCategories([]);
+    // No need to manually call fetchProducts as the useEffect will handle it
+  };
 
   const addProduct = (newProduct) => {
     // Append new product locally and let the API refresh be handled elsewhere if needed
@@ -50,12 +115,6 @@ const Product = () => {
     setProducts(products.filter((product) => product.id !== id));
   };
 
-  const editProduct = (editedProduct) => {
-    setProducts(products.map(product =>
-      product.id === editedProduct.id ? editedProduct : product
-    ));
-  };
-
   const handleEdit = (product) => {
     setEditingProduct(product);
     setShowEditModal(true);
@@ -65,6 +124,7 @@ const Product = () => {
     setProducts(
       products.map((prod) => (prod.id === updatedProduct.id ? updatedProduct : prod))
     );
+    setShowEditModal(false);
   };
 
   useEffect(() => {
@@ -100,20 +160,77 @@ const Product = () => {
           <p className="text-amber-600 mt-1">Efficiently track and manage your products</p>
         </div>
 
-        <div className="mb-4 flex items-center gap-2">
-          <input
-            type="text"
-            placeholder="Search products..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full p-3 border border-amber-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500"
-          />
-          <button
-            className="p-3 bg-amber-500 text-white rounded-xl hover:bg-amber-600 transition duration-200"
-          >
+        <motion.div
+          className="bg-white p-6 rounded-xl shadow-md mb-6 border border-amber-100"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+        >
+          <h2 className="text-lg font-semibold text-amber-700 mb-4 flex items-center gap-2">
             <Search className="w-5 h-5" />
-          </button>
-        </div>
+            Search Products
+          </h2>
+
+          <div className="mb-4">
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Search by product name..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full p-3 border border-amber-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 transition-all"
+              />
+              {isSearching && (
+                <motion.div
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2"
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                >
+                  <div className="w-5 h-5 border-2 border-amber-500 border-t-transparent rounded-full" />
+                </motion.div>
+              )}
+            </div>
+          </div>
+
+          {categories.length > 0 && (
+            <div className="mb-4">
+              <p className="text-sm font-medium text-amber-700 mb-2 flex items-center gap-1">
+                <Tag className="w-4 h-4" />
+                Filter by category:
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {categories.map((category) => (
+                  <motion.button
+                    key={category._id || category.id}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => toggleCategory(category.name)}
+                    className={`px-3 py-1 text-sm rounded-full transition-all ${selectedCategories.includes(category.name)
+                      ? 'bg-amber-500 text-white'
+                      : 'bg-amber-100 text-amber-700 hover:bg-amber-200'
+                      }`}
+                  >
+                    {category.name}
+                  </motion.button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {(searchQuery || selectedCategories.length > 0) && (
+            <div className="flex justify-end">
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={clearFilters}
+                className="text-sm text-amber-600 hover:text-amber-800 flex items-center gap-1"
+              >
+                <FilterX className="w-4 h-4" />
+                Clear all filters
+              </motion.button>
+            </div>
+          )}
+        </motion.div>
 
         <motion.div
           whileHover={{ scale: 1.03 }}
@@ -160,9 +277,15 @@ const Product = () => {
                 Loading sweet treats...
               </motion.p>
             </div>
+          ) : products.length === 0 ? (
+            <div className="py-12 text-center">
+              <Dessert className="w-16 h-16 mx-auto text-amber-300 mb-4" />
+              <h3 className="text-lg font-medium text-amber-700 mb-2">No products found</h3>
+              <p className="text-amber-500">Try adjusting your search or filters</p>
+            </div>
           ) : (
             <ProductList
-              products={filteredProducts}
+              products={products}
               onDelete={deleteProduct}
               onEdit={handleEdit}
             />
@@ -181,7 +304,7 @@ const Product = () => {
             className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
           >
             <motion.div
-              className="relative bg-white p-8 rounded-lg shadow-xl w-full max-w-md"
+              className="relative bg-white p-8 rounded-lg shadow-xl w-3/4 h-3/4 overflow-y-auto"
               initial={{ y: -100, scale: 0.95 }}
               animate={{ y: 0, scale: 1 }}
               exit={{ y: 100, scale: 0.95 }}
