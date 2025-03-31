@@ -4,76 +4,65 @@ import ProductCategoriesModel from "../../models/productManagementModels/Product
 import ProductImagesModel from "../../models/productManagementModels/ProductImagesModel.js";
 
 export const createProduct = async (req, res) => {
-    const { name, description, categories = [], images = [] } = req.body;
+    const { name, description, categories = [] } = req.body
 
     try {
         // Validate required fields
         if (!name || !description) {
-            return res.status(400).json({ message: "Name and description are required." });
+            return res.status(400).json({ message: "Name and description are required." })
         }
 
-        // Save in Product
-        const product = new ProductModel({ name, description });
-        await product.save();
+        // Create and save the product
+        const product = new ProductModel({ name, description })
+        await product.save()
 
-        // Fetch category IDs
+        // Process categories: find category IDs from the provided category names
         const categoryIds = await Promise.all(
             categories.map(async (category) => {
-                const categoryDoc = await CategoryModel.findOne({ name: category });
+                const categoryDoc = await CategoryModel.findOne({ name: category })
                 if (!categoryDoc) {
-                    return res.status(401).json({ message: `Category ${category} not found.` });
+                    return res.status(401).json({ message: `Category ${category} not found.` })
                 }
-                return categoryDoc ? categoryDoc._id : null;
+                return categoryDoc._id
             })
-        );
+        )
 
-        // Remove null values (in case category was not found)
-        const validCategoryIds = categoryIds.filter((id) => id !== null);
-
-        // Save in ProductCategoriesModel
+        // Remove any null values from categoryIds
+        const validCategoryIds = categoryIds.filter(id => id !== null)
         if (validCategoryIds.length === 0) {
-            return res.status(402).json({ message: "No valid categories found." });
+            return res.status(402).json({ message: "No valid categories found." })
         } else {
+            // Save product-category relationships
             await Promise.all(
                 validCategoryIds.map(async (categoryId) => {
-                    try {
-                        const productCategory = new ProductCategoriesModel({
-                            Product: product._id,
-                            Category: categoryId
-                        });
-                        await productCategory.save();
-                    } catch (err) {
-                        return res.status(403).json({ message: `Error saving product category: ${err.message}` });
-                    }
+                    const productCategory = new ProductCategoriesModel({
+                        Product: product._id,
+                        Category: categoryId
+                    })
+                    await productCategory.save()
                 })
-            );
+            )
         }
 
-        // Save in ProductImagesModel
-        if (images.length === 0) {
-            return res.status(404).json({ message: "No images provided." });
+        if (!req.files || req.files.length === 0) {
+            return res.status(404).json({ message: "No images provided." })
         } else {
             await Promise.all(
-                images.map(async (image) => {
-                    try {
-                        const productImage = new ProductImagesModel({
-                            product: product._id,
-                            url: image
-                        });
-                        await productImage.save();
-                    } catch (err) {
-                        return res.status(405).json({ message: `Error saving product image: ${err.message}` });
-                    }
+                req.files.map(async (file) => {
+                    const productImage = new ProductImagesModel({
+                        product: product._id,
+                        url: `/uploads/${file.filename}`
+                    })
+                    await productImage.save()
                 })
-            );
+            )
         }
 
-        res.status(201).json({ message: "Product created successfully!", product });
-
+        res.status(201).json({ message: "Product created successfully!", product })
     } catch (error) {
-        res.status(500).json({ message: "Internal Server Error", error: error.message });
+        res.status(500).json({ message: "Internal Server Error", error: error.message })
     }
-};
+}
 
 export const getProductById = async (req, res) => {
     const { id } = req.params;
