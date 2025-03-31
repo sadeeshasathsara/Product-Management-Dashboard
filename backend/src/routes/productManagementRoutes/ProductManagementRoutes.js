@@ -23,7 +23,7 @@ router.delete('/category', deleteCategory)
 router.post('/product', upload.array('images', 5), createProduct)
 router.get('/product/:id', getProductById)
 router.get('/product', getAllProducts)
-router.put('/product', updateProduct)
+router.put('/product', upload.array('images', 5), updateProduct)
 router.delete('/product', deleteProduct)
 
 //Supplier routes

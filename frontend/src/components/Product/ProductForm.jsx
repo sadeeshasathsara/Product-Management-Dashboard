@@ -1,5 +1,6 @@
-import { useState } from 'react';
-import { ImagePlus, X } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { ImagePlus, X, Plus } from 'lucide-react';
+import axios from 'axios';
 
 const ProductForm = ({ onSubmit }) => {
   const [productName, setProductName] = useState('');
@@ -7,6 +8,56 @@ const ProductForm = ({ onSubmit }) => {
   const [description, setDescription] = useState('');
   const [images, setImages] = useState([]);
   const [previewImages, setPreviewImages] = useState([]);
+
+  // For category autocomplete
+  const [availableCategories, setAvailableCategories] = useState([]);
+  const [categoryInput, setCategoryInput] = useState('');
+  const [filteredCategories, setFilteredCategories] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  // Fetch categories from the backend
+  useEffect(() => {
+    const fetchCategories = async () => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const response = await axios.get('http://localhost:5000/api/product-management/category');
+        // Handle the API response format - extract category names from objects
+        if (Array.isArray(response.data)) {
+          const categoryNames = response.data.map(category => category.name);
+          setAvailableCategories(categoryNames);
+        } else {
+          setError('Unexpected response format from API');
+        }
+      } catch (err) {
+        setError('Failed to fetch categories. Please try again later.');
+        console.error('Error fetching categories:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
+  // Filter categories based on input
+  useEffect(() => {
+    if (!availableCategories || !Array.isArray(availableCategories)) {
+      setFilteredCategories([]);
+      return;
+    }
+
+    if (categoryInput.trim() === '') {
+      setFilteredCategories([]);
+      return;
+    }
+
+    const filtered = availableCategories.filter(
+      category => category.toLowerCase().includes(categoryInput.toLowerCase())
+    );
+    setFilteredCategories(filtered);
+  }, [categoryInput, availableCategories]);
 
   const handleNameChange = (e) => {
     const value = e.target.value;
@@ -39,41 +90,43 @@ const ProductForm = ({ onSubmit }) => {
     setPreviewImages(newPreviewImages);
   };
 
-  const handleCategoryChange = (e) => {
-    const value = e.target.value;
-    if (categories.includes(value)) {
-      setCategories(categories.filter(cat => cat !== value));
-    } else {
-      setCategories([...categories, value]);
+  const handleCategorySelect = (category) => {
+    if (!categories.includes(category)) {
+      setCategories([...categories, category]);
+    }
+    setCategoryInput('');
+  };
+
+  const removeCategory = (category) => {
+    setCategories(categories.filter(cat => cat !== category));
+  };
+
+  const addCustomCategory = () => {
+    if (categoryInput.trim() !== '' && !categories.includes(categoryInput.trim())) {
+      setCategories([...categories, categoryInput.trim()]);
+      setCategoryInput('');
     }
   };
 
   const handleFormSubmit = (e) => {
     e.preventDefault();
-    
-    if (!productName.trim()) {
-      alert('Please enter a valid product name');
-      return;
-    }
-    
-    if (categories.length === 0) {
-      alert('Please select at least one category');
-      return;
-    }
+    // Basic validations...
 
-    if (!description.trim()) {
-      alert('Please enter a description');
-      return;
-    }
+    const formData = new FormData();
+    formData.append('name', productName);
+    formData.append('description', description);
+    categories.forEach((category) => formData.append('categories[]', category));
+    images.forEach((file) => formData.append('images', file));
 
-    const newProduct = {
-      name: productName,
-      categories,
-      description,
-      images: previewImages,
-    };
+    axios.post('http://localhost:5000/api/product-management/product', formData)
+      .then(response => {
+        console.log("Data posted successfully", response.data);
+      })
+      .catch(error => {
+        console.error("Error posting data", error);
+      });
 
-    onSubmit(newProduct);
+    onSubmit({ name: productName, description, categories, images: previewImages });
     resetForm();
   };
 
@@ -83,16 +136,8 @@ const ProductForm = ({ onSubmit }) => {
     setDescription('');
     setImages([]);
     setPreviewImages([]);
+    setCategoryInput('');
   };
-
-  const categoryOptions = [
-    "Cakes",
-    "Cupcakes",
-    "Cookies",
-    "Chocolates",
-    "Ice Cream",
-    "Other"
-  ];
 
   return (
     <form onSubmit={handleFormSubmit} className="space-y-4">
@@ -119,29 +164,64 @@ const ProductForm = ({ onSubmit }) => {
         <label className="block text-sm font-medium text-amber-700 mb-1">
           Categories <span className="text-orange-500">*</span>
         </label>
-        <div className="grid grid-cols-2 gap-2">
-          {categoryOptions.map((option) => (
-            <div key={option} className="flex items-center">
-              <input
-                type="checkbox"
-                id={`category-${option}`}
-                value={option}
-                checked={categories.includes(option)}
-                onChange={handleCategoryChange}
-                className="h-4 w-4 text-amber-600 focus:ring-amber-500 border-amber-300 rounded"
-              />
-              <label 
-                htmlFor={`category-${option}`} 
-                className="ml-2 block text-sm text-amber-700"
-              >
-                {option}
-              </label>
+        <div className="relative">
+          <div className="flex">
+            <input
+              type="text"
+              value={categoryInput}
+              onChange={(e) => setCategoryInput(e.target.value)}
+              className="w-full px-3 py-2 border border-amber-200 rounded-l-md focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+              placeholder="Search or add category..."
+            />
+            <button
+              type="button"
+              onClick={addCustomCategory}
+              className="bg-amber-500 text-white px-3 py-2 rounded-r-md hover:bg-amber-600"
+            >
+              <Plus className="w-5 h-5" />
+            </button>
+          </div>
+
+          {isLoading && (
+            <div className="mt-1 text-sm text-amber-600">Loading categories...</div>
+          )}
+
+          {error && (
+            <div className="mt-1 text-sm text-red-500">{error}</div>
+          )}
+
+          {filteredCategories.length > 0 && (
+            <div className="absolute z-10 mt-1 w-full bg-white border border-amber-200 rounded-md shadow-lg max-h-60 overflow-auto">
+              {filteredCategories.map((category) => (
+                <div
+                  key={category}
+                  className="px-3 py-2 hover:bg-amber-100 cursor-pointer"
+                  onClick={() => handleCategorySelect(category)}
+                >
+                  {category}
+                </div>
+              ))}
             </div>
-          ))}
+          )}
         </div>
+
         {categories.length > 0 && (
-          <div className="mt-2 text-sm text-amber-600">
-            Selected: {categories.join(', ')}
+          <div className="mt-2 flex flex-wrap gap-2">
+            {categories.map((category) => (
+              <div
+                key={category}
+                className="flex items-center bg-amber-100 px-2 py-1 rounded-md"
+              >
+                <span className="text-sm text-amber-700">{category}</span>
+                <button
+                  type="button"
+                  onClick={() => removeCategory(category)}
+                  className="ml-1 text-amber-500 hover:text-amber-700"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              </div>
+            ))}
           </div>
         )}
       </div>
