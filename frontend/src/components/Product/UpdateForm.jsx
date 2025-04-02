@@ -8,6 +8,10 @@ const UpdateForm = ({ product, onUpdate, onClose }) => {
   const [images, setImages] = useState([]);
   const [previewImages, setPreviewImages] = useState(product.images);
 
+  // NEW: State for input field error messages
+  const [nameError, setNameError] = useState('');
+  const [descriptionError, setDescriptionError] = useState('');
+
   useEffect(() => {
     setProductName(product.name);
     setCategory(product.category);
@@ -89,9 +93,12 @@ const UpdateForm = ({ product, onUpdate, onClose }) => {
                 type="text"
                 value={productName}
                 onChange={(e) => setProductName(e.target.value)}
+                onInput={(e) => setNameError(e.target.validationMessage)}
                 className="w-full px-3 py-2 border border-orange-200 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                 required
               />
+              {/* NEW: Display error message in red when typing */}
+              {nameError && <p className="mt-1 text-sm text-red-500">{nameError}</p>}
             </div>
 
             <div>
@@ -120,10 +127,13 @@ const UpdateForm = ({ product, onUpdate, onClose }) => {
               <textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
+                onInput={(e) => setDescriptionError(e.target.validationMessage)}
                 className="w-full px-3 py-2 border border-orange-200 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                 rows="3"
                 required
               />
+              {/* NEW: Display error message in red when typing */}
+              {descriptionError && <p className="mt-1 text-sm text-red-500">{descriptionError}</p>}
             </div>
 
             <div>

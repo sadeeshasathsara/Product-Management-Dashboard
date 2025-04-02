@@ -13,6 +13,10 @@ const EditProductForm = ({ product, onSubmit, onClose }) => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState(null);
 
+    // NEW: State for input field error messages
+    const [nameError, setNameError] = useState('');
+    const [descriptionError, setDescriptionError] = useState('');
+
     // For category suggestions
     const [allCategories, setAllCategories] = useState([]);
     const [categoryInput, setCategoryInput] = useState('');
@@ -254,12 +258,16 @@ const EditProductForm = ({ product, onSubmit, onClose }) => {
                             type="text"
                             value={productName}
                             onChange={handleNameChange}
+                            onInput={(e) => setNameError(e.target.validationMessage)}
+                            onInvalid={(e) => { e.preventDefault(); setNameError(e.target.validationMessage); }}
                             className="w-full px-3 py-2 border border-amber-200 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
                             required
                             placeholder="Enter product name"
                         />
                         <Edit3 className="absolute right-3 top-1/2 transform -translate-y-1/2 text-amber-400 w-4 h-4" />
                     </div>
+                    {/* NEW: Display error message in red when typing */}
+                    {nameError && <p className="mt-1 text-sm text-red-500">{nameError}</p>}
                 </div>
 
                 {/* Categories */}
@@ -316,11 +324,15 @@ const EditProductForm = ({ product, onSubmit, onClose }) => {
                     <textarea
                         value={description}
                         onChange={handleDescriptionChange}
+                        onInput={(e) => setDescriptionError(e.target.validationMessage)}
+                        onInvalid={(e) => { e.preventDefault(); setDescriptionError(e.target.validationMessage); }}
                         className="w-full px-3 py-2 border border-amber-200 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
                         rows="3"
                         required
                         placeholder="Describe your product"
                     />
+                    {/* NEW: Display error message in red when typing */}
+                    {descriptionError && <p className="mt-1 text-sm text-red-500">{descriptionError}</p>}
                 </div>
 
                 {/* Error message display */}

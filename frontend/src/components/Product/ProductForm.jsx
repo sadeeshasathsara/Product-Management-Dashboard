@@ -16,6 +16,10 @@ const ProductForm = ({ onSubmit }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  // NEW: State for input field error messages
+  const [nameError, setNameError] = useState('');
+  const [descriptionError, setDescriptionError] = useState('');
+
   // Fetch categories from the backend
   useEffect(() => {
     const fetchCategories = async () => {
@@ -165,6 +169,7 @@ const ProductForm = ({ onSubmit }) => {
           type="text"
           value={productName}
           onChange={handleNameChange}
+          onInput={(e) => setNameError(e.target.validationMessage)}
           className="w-full px-3 py-2 border border-amber-200 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
           placeholder="e.g., Chocolate Cupcake"
           required
@@ -174,6 +179,8 @@ const ProductForm = ({ onSubmit }) => {
         <p className="mt-1 text-sm text-gray-500">
           Only letters, spaces, and basic punctuation (.,'-) allowed
         </p>
+        {/* NEW: Display error message in red when typing */}
+        {nameError && <p className="mt-1 text-sm text-red-500">{nameError}</p>}
       </div>
 
       <div>
@@ -249,16 +256,19 @@ const ProductForm = ({ onSubmit }) => {
         <textarea
           value={description}
           onChange={(e) => setDescription(e.target.value)}
+          onInput={(e) => setDescriptionError(e.target.validationMessage)}
           className="w-full px-3 py-2 border border-amber-200 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
           rows="3"
           placeholder="Describe your sweet product..."
           required
         />
+        {/* NEW: Display error message in red when typing */}
+        {descriptionError && <p className="mt-1 text-sm text-red-500">{descriptionError}</p>}
       </div>
 
       <div>
         <label className="block text-sm font-medium text-orange-700 mb-1">
-          Product Images (Max 5)
+          Product Images* (Max 5)
         </label>
         <div className="flex items-center justify-center w-full">
           <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-amber-300 rounded-lg cursor-pointer bg-orange-50 hover:bg-orange-100">
@@ -274,6 +284,7 @@ const ProductForm = ({ onSubmit }) => {
               accept="image/*"
               onChange={handleImageChange}
               className="hidden"
+              required
             />
           </label>
         </div>
